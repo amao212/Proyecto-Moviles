@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -107,7 +108,7 @@ class _RegistroMascotaPageState extends State<RegistroMascotaPage> {
     }
 
     // Filtra la búsqueda agregando ", Quito, Ecuador" para que sea local
-    final url = Uri.parse('https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(texto + ", Quito, Ecuador")}&format=json&limit=3');
+    final url = Uri.parse('https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent("$texto, Quito, Ecuador")}&format=json&limit=3');
 
     try {
       final respuesta = await http.get(url, headers: {'User-Agent': 'app_registro_mascotas'});
@@ -137,9 +138,9 @@ class _RegistroMascotaPageState extends State<RegistroMascotaPage> {
 
   // Envía los datos empaquetados mediante un Intent hacia la App 2
   void _enviarDatosApp2() {
-    if (_nombreMascotaController.text.isEmpty || 
-        _duenoController.text.isEmpty || 
-        _telefonoController.text.isEmpty || 
+    if (_nombreMascotaController.text.isEmpty ||
+        _duenoController.text.isEmpty ||
+        _telefonoController.text.isEmpty ||
         _correoController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, llena los campos obligatorios')),
@@ -163,9 +164,14 @@ class _RegistroMascotaPageState extends State<RegistroMascotaPage> {
 
     // Configuración del Intent inter-procesos para Android
     final AndroidIntent intent = AndroidIntent(
-      action: 'android.intent.action.SEND',
+      action: 'android.intent.action.MAIN',
+      category: 'android.intent.category.LAUNCHER',
       package: 'com.example.app_veterinaria_agenda', // ID de la App 2
       componentName: 'com.example.app_veterinaria_agenda.MainActivity',
+      flags: <int>[
+        Flag.FLAG_ACTIVITY_NEW_TASK,
+        Flag.FLAG_ACTIVITY_CLEAR_TOP,
+      ],
       arguments: datosMascota,
     );
 
@@ -564,7 +570,7 @@ class _RegistroMascotaPageState extends State<RegistroMascotaPage> {
         border: Border.all(color: Colors.grey.shade200, width: 1.5),
       ),
       child: DropdownButtonFormField<String>(
-        value: _especieSeleccionada,
+        initialValue: _especieSeleccionada,
         dropdownColor: Colors.white, // Bordes del panel flotante corregidos
         borderRadius: BorderRadius.circular(20), 
         hint: Text('Seleccionar...', style: TextStyle(color: Colors.grey.shade400)),
@@ -600,7 +606,7 @@ class _RegistroMascotaPageState extends State<RegistroMascotaPage> {
         border: Border.all(color: Colors.grey.shade200, width: 1.5),
       ),
       child: DropdownButtonFormField<String>(
-        value: _razaSeleccionada,
+        initialValue: _razaSeleccionada,
         dropdownColor: Colors.white, // Bordes del panel flotante corregidos
         borderRadius: BorderRadius.circular(20),
         hint: Text('Seleccionar raza...', style: TextStyle(color: Colors.grey.shade400)),
